@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vinusic</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'brand-primary': '#3A7BD5', // New Deep Blue
+            'brand-dark': '#121212',
+            'brand-light-dark': '#181818',
+            'brand-gray': '#282828',
+            'brand-light-gray': '#B3B3B3',
+            'brand-white': '#FFFFFF',
+            // Light theme colors
+            'light-bg-main': '#FFFFFF',
+            'light-bg-secondary': '#F3F4F6', // gray-100
+            'light-bg-tertiary': '#E5E7EB',   // gray-200
+            'light-text-primary': '#1F2937',  // gray-800
+            'light-text-secondary': '#4B5563', // gray-600
+            'light-border': '#D1D5DB', // gray-300
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --brand-primary: #3A7BD5; /* New Deep Blue */
+      --brand-dark: #121212;
+      --brand-light-dark: #181818;
+      --brand-gray: #282828;
+      --brand-light-gray: #B3B3B3;
+      --brand-white: #FFFFFF;
+      
+      --light-bg-main: #FFFFFF;
+      --light-bg-secondary: #F3F4F6;
+      --light-bg-tertiary: #E5E7EB;
+      --light-text-primary: #1F2937;
+      --light-text-secondary: #4B5563;
+      --light-border: #D1D5DB;
+
+      /* Default to dark theme variables */
+      --current-bg-main: var(--brand-dark);
+      --current-bg-secondary: var(--brand-light-dark);
+      --current-bg-tertiary: var(--brand-gray);
+      --current-text-primary: var(--brand-white);
+      --current-text-secondary: var(--brand-light-gray);
+      --current-border: var(--brand-gray);
+    }
+
+    body {
+      background-color: var(--current-bg-main);
+      color: var(--current-text-primary);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    
+    body.light-mode {
+      --current-bg-main: var(--light-bg-main);
+      --current-bg-secondary: var(--light-bg-secondary);
+      --current-bg-tertiary: var(--light-bg-tertiary);
+      --current-text-primary: var(--light-text-primary);
+      --current-text-secondary: var(--light-text-secondary);
+      --current-border: var(--light-border);
+    }
+
+    /* Custom scrollbar for webkit browsers */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--current-bg-tertiary);
+      transition: background-color 0.3s ease;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #535353;
+      border-radius: 4px;
+    }
+    body.light-mode ::-webkit-scrollbar-thumb {
+      background: #A0A0A0;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #737373;
+    }
+    body.light-mode ::-webkit-scrollbar-thumb:hover {
+      background: #808080;
+    }
+
+    /* Basic icon styling */
+    .icon {
+      width: 24px;
+      height: 24px;
+      stroke-width: 1.5;
+      fill: none;
+      stroke: currentColor;
+      transition: color 0.3s ease;
+    }
+    .filled-icon {
+        fill: currentColor;
+        stroke: currentColor;
+    }
+
+    /* Card hover effects */
+    .content-card {
+      background-color: var(--current-bg-secondary);
+      transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .content-card:hover {
+      background-color: var(--current-bg-tertiary);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2), 0 4px 6px -4px rgba(0,0,0,0.1);
+    }
+    .card-play-button {
+      opacity: 0;
+      transform: translateY(0.5rem);
+      transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
+    .content-card:hover .card-play-button {
+      opacity: 1;
+      transform: translateY(-0.5rem) scale(1.05);
+    }
+
+    .premium-badge {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background-color: #FFD700; /* Gold for premium */
+      color: var(--brand-dark); /* Dark text for contrast */
+      font-size: 0.65rem;
+      font-weight: bold;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .hidden-input { display: none; }
+
+    button, .clickable-label, .sidebar-link, .playlist-item, .user-profile-link {
+      transition: opacity 0.2s, transform 0.2s, background-color 0.2s, color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    button:active, .clickable-label:active, .sidebar-link:active, .playlist-item:active, .user-profile-link:active {
+      transform: scale(0.95);
+      opacity: 0.8;
+    }
+    button:focus-visible, .clickable-label:focus-visible, .sidebar-link:focus-visible, .playlist-item:focus-visible, .user-profile-link:focus-visible {
+        outline: 2px solid var(--brand-primary);
+        outline-offset: 2px;
+    }
+
+    .sidebar-link:hover, .playlist-item:hover, .user-profile-link:hover {
+        background-color: var(--current-bg-tertiary);
+        color: var(--brand-primary);
+        transform: translateX(4px);
+    }
+     .go-premium-btn:hover {
+        filter: brightness(1.1);
+        box-shadow: 0 0 15px var(--brand-primary);
+    }
+
+
+    /* Theme Toggle Display (Icons) */
+    .theme-toggle-label .sun-icon { display: none; } /* Initially hide sun in dark mode */
+    .theme-toggle-label .moon-icon { display: inline-block; } /* Initially show moon in dark mode */
+
+    body.light-mode .theme-toggle-label .sun-icon { display: inline-block; }
+    body.light-mode .theme-toggle-label .moon-icon { display: none; }
+    
+    body.light-mode .bg-brand-dark { background-color: var(--current-bg-main) !important; }
+    body.light-mode .bg-brand-light-dark { background-color: var(--current-bg-secondary) !important; }
+    body.light-mode .bg-brand-gray { background-color: var(--current-bg-tertiary) !important; }
+    body.light-mode .text-brand-white { color: var(--current-text-primary) !important; }
+    body.light-mode .text-brand-light-gray { color: var(--current-text-secondary) !important; }
+    body.light-mode .border-brand-gray { border-color: var(--current-border) !important; }
+    body.light-mode .border-brand-light-dark { border-color: var(--current-border) !important; }
+    
+    /* General UI Element Styling (using CSS variables now directly) */
+    .themed-bg-main { background-color: var(--current-bg-main); transition: background-color 0.3s ease; }
+    .themed-bg-secondary { background-color: var(--current-bg-secondary); transition: background-color 0.3s ease; }
+    .themed-bg-tertiary { background-color: var(--current-bg-tertiary); transition: background-color 0.3s ease; }
+    .themed-text-primary { color: var(--current-text-primary); transition: color 0.3s ease; }
+    .themed-text-secondary { color: var(--current-text-secondary); transition: color 0.3s ease; }
+    .themed-border { border-color: var(--current-border); transition: border-color 0.3s ease; }
+
+    /* Search Styling */
+    #search-toggle:checked ~ #app-layout .main-content #search-bar-container {
+      max-height: 100px; /* Or enough to show the bar */
+      opacity: 1;
+      padding-top: 1rem; 
+      padding-bottom: 1rem; 
+    }
+    #search-bar-container {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out, padding 0.5s ease-in-out;
+    }
+    .search-input::placeholder {
+        color: var(--current-text-secondary);
+        opacity: 0.7;
+    }
+
+    /* Player Bar Button Interactivity */
+    #like-toggle:checked + label .liked-icon { display: inline-block; }
+    #like-toggle:checked + label .unliked-icon { display: none; }
+    #like-toggle:checked + label { color: var(--brand-primary); }
+
+    #play-toggle:checked + label .pause-icon { display: inline-block; }
+    #play-toggle:checked + label .play-icon { display: none; }
+    
+    #shuffle-toggle:checked + label { color: var(--brand-primary); }
+    #repeat-toggle:checked + label { color: var(--brand-primary); }
+
+
+    /* Volume Control Popup */
+    #volume-toggle:checked ~ .volume-popup {
+      display: block;
+      opacity: 1;
+      transform: translateY(-10px) scale(1);
+    }
+    .volume-popup {
+      display: none;
+      opacity: 0;
+      transform-origin: bottom center; 
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+    .volume-bar {
+      background-color: var(--current-border); 
+      height: 6px;
+    }
+    .volume-level {
+      background-color: var(--brand-primary); 
+      height: 100%;
+    }
+    body.light-mode .volume-bar { /* Ensure volume bar track adapts in light mode */
+      background-color: var(--light-border); 
+    }
+
+
+    /* Lyrics Modal */
+    #lyrics-toggle:checked ~ .lyrics-modal-overlay {
+      opacity: 1;
+      visibility: visible;
+    }
+    .lyrics-modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+      z-index: 50;
+    }
+    body.light-mode .lyrics-modal-overlay {
+        background-color: rgba(200,200,200,0.7);
+    }
+    .lyrics-modal-content {
+      max-height: 80vh;
+      overflow-y: auto;
+      width: 90%;
+      max-width: 600px;
+      transition: transform 0.3s ease;
+      transform: scale(0.95);
+    }
+    #lyrics-toggle:checked ~ .lyrics-modal-overlay .lyrics-modal-content {
+      transform: scale(1);
+    }
+
+    /* Queue Notification */
+    .queue-btn .queue-notification {
+      display: none;
+      position: absolute;
+      bottom: 100%; 
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: var(--brand-primary);
+      color: var(--brand-white);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      margin-bottom: 0.5rem; 
+    }
+    .queue-btn:active .queue-notification {
+      display: inline-block;
+      animation: fadeOut 1s forwards;
+    }
+    @keyframes fadeOut {
+      0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      80% { opacity: 1; transform: translateX(-50%) translateY(-5px); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+    }
+    .artist-card-image {
+        border: 2px solid transparent;
+        transition: border-color 0.3s ease, transform 0.3s ease;
+    }
+    .artist-card:hover .artist-card-image {
+        border-color: var(--brand-primary);
+    }
+    .player-control-btn:hover {
+        color: var(--brand-primary);
+        transform: scale(1.1);
+    }
+    .player-play-btn:hover {
+        /* color: var(--brand-primary); Handled by themed-text-primary */
+        transform: scale(1.15);
+    }
+    .progress-track {
+        background-color: var(--current-bg-tertiary);
+        height: 4px;
+        border-radius: 2px;
+    }
+    .progress-fill {
+        background-color: var(--brand-primary);
+        height: 100%;
+        border-radius: 2px;
+    }
+  </style>
+</head>
+<body> 
+  <input type="checkbox" id="theme-toggle" class="hidden-input">
+  <input type="checkbox" id="search-toggle" class="hidden-input">
+  <input type="checkbox" id="like-toggle" class="hidden-input">
+  <input type="checkbox" id="play-toggle" class="hidden-input" checked> 
+  <input type="checkbox" id="volume-toggle" class="hidden-input">
+  <input type="checkbox" id="lyrics-toggle" class="hidden-input">
+  <input type="checkbox" id="shuffle-toggle" class="hidden-input">
+  <input type="checkbox" id="repeat-toggle" class="hidden-input">
+
+  <div id="app-layout" class="flex h-screen themed-bg-main themed-text-primary">
+    <!-- Sidebar -->
+    <nav class="w-64 themed-bg-secondary p-5 flex flex-col space-y-6 fixed h-full overflow-y-auto">
+      <div>
+        <h1 class="text-3xl font-bold text-brand-primary">Vinusic</h1>
+      </div>
+      <ul class="space-y-2">
+        <li><a href="#" class="sidebar-link flex items-center space-x-3 p-2 rounded-md themed-text-secondary hover:themed-text-primary"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg><span>Home</span></a></li>
+        <li><label for="search-toggle" class="sidebar-link clickable-label flex items-center space-x-3 p-2 rounded-md themed-text-secondary hover:themed-text-primary"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg><span>Search</span></label></li>
+        <li><a href="#" class="sidebar-link flex items-center space-x-3 p-2 rounded-md themed-text-secondary hover:themed-text-primary"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"></path></svg><span>Your Library</span></a></li>
+        <li><a href="#" class="sidebar-link flex items-center space-x-3 p-2 rounded-md themed-text-secondary hover:themed-text-primary"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg><span>Podcasts</span></a></li>
+      </ul>
+      <div class="space-y-2">
+        <button class="sidebar-link flex items-center space-x-3 w-full p-2 rounded-md themed-text-secondary hover:themed-text-primary"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg><span>Create Playlist</span></button>
+        <button class="sidebar-link flex items-center space-x-3 w-full p-2 rounded-md themed-text-secondary hover:themed-text-primary"><svg class="icon filled-icon text-brand-primary" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg><span>Liked Songs</span></button>
+      </div>
+      <hr class="themed-border">
+      <div class="space-y-2 overflow-y-auto flex-grow">
+        <h3 class="themed-text-secondary text-sm font-semibold uppercase tracking-wider px-2">Playlists</h3>
+        <a href="#" class="playlist-item block p-2 rounded-md themed-text-secondary hover:themed-text-primary text-sm">Bollywood Hits</a>
+        <a href="#" class="playlist-item block p-2 rounded-md themed-text-secondary hover:themed-text-primary text-sm">Tollywood Tadka</a>
+        <a href="#" class="playlist-item block p-2 rounded-md themed-text-secondary hover:themed-text-primary text-sm">Punjabi Beats</a>
+        <a href="#" class="playlist-item block p-2 rounded-md themed-text-secondary hover:themed-text-primary text-sm">Indie India</a>
+        <a href="#" class="playlist-item block p-2 rounded-md themed-text-secondary hover:themed-text-primary text-sm">Workout Jams</a>
+        <a href="#" class="playlist-item block p-2 rounded-md themed-text-secondary hover:themed-text-primary text-sm">90s Nostalgia</a>
+      </div>
+      <button class="w-full go-premium-btn bg-brand-primary text-brand-white font-semibold py-2 px-4 rounded-full mt-auto focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-brand-dark focus:ring-brand-primary">
+        Go Premium
+      </button>
+       <div class="mt-4 pt-4 border-t themed-border">
+        <label for="theme-toggle" title="Toggle light/dark theme" class="theme-toggle-label clickable-label flex items-center justify-center space-x-2 p-2 rounded-md themed-text-secondary hover:themed-text-primary">
+          <svg class="icon sun-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+          <svg class="icon moon-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+          <span>Toggle Theme</span>
+        </label>
+      </div>
+      <a href="signin.html" class="user-profile-link mt-auto pt-4 border-t themed-border flex items-center space-x-3 p-2 rounded-md themed-text-secondary hover:themed-text-primary" title="Sign In / User Profile">
+          <img src="https://via.placeholder.com/40/3A7BD5/FFFFFF?text=U" alt="User Avatar" class="w-10 h-10 rounded-full">
+          <span class="font-semibold themed-text-primary">User Name</span>
+      </a>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content flex-1 ml-64 themed-bg-main p-8 overflow-y-auto pb-32">
+      <div id="search-bar-container" class="mb-0">
+          <input type="text" placeholder="Search for songs, artists, podcasts..." class="search-input w-full p-3 themed-bg-tertiary themed-text-primary rounded-lg focus:ring-2 focus:ring-brand-primary focus:outline-none">
+      </div>
+
+      <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 rounded-lg shadow-lg mb-8 text-white">
+        <h2 class="text-2xl font-bold mb-2">Upgrade to Premium</h2>
+        <p class="mb-4">Enjoy ad-free music, offline listening, and high-quality audio. Get started today!</p>
+        <button class="bg-white text-blue-600 font-semibold py-2 px-6 rounded-full hover:bg-gray-200 transition duration-150">
+            Get Premium
+        </button>
+      </div>
+      
+      <section class="mb-8">
+        <h2 class="text-2xl font-semibold themed-text-primary mb-4">Recently Played</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+          <div class="content-card p-4 rounded-lg shadow group relative">
+            <img src="https://assets.gadgets360cdn.com/pricee/assets/product/202309/Hungry-Cheetah_1694430116.jpg" alt="Album Art" class="w-full h-auto rounded mb-2">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Hungry Cheetah</h3>
+            <p class="themed-text-secondary text-xs truncate">Thaman S</p>
+            <button class="card-play-button absolute bottom-16 right-4 bg-brand-primary p-3 rounded-full shadow-lg text-brand-white">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+            </button>
+          </div>
+          <div class="content-card p-4 rounded-lg shadow group relative">
+            <img src="https://i.pinimg.com/originals/7b/1d/cc/7b1dcc0e6c85454b7f9cb9ba80c6f92c.jpg" alt="Album Art" class="w-full h-auto rounded mb-2">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Jab Tak</h3>
+            <p class="themed-text-secondary text-xs truncate">Armaan Malik</p>
+            <div class="premium-badge">Premium</div>
+            <button class="card-play-button absolute bottom-16 right-4 bg-brand-primary p-3 rounded-full shadow-lg text-brand-white">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+            </button>
+          </div>
+          <div class="content-card p-4 rounded-lg shadow group"><img src="http://static.moviecrow.com/gallery/20160704/94444-CmcwhBRVIAEeAb8.jpg" alt="Album Art" class="w-full h-auto rounded mb-2"><h3 class="font-semibold themed-text-primary text-sm truncate">Kollagottey</h3><p class="themed-text-secondary text-xs truncate">Anirudh Ravichander</p><button class="card-play-button absolute bottom-16 right-4 bg-brand-primary p-3 rounded-full shadow-lg text-brand-white"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg></button></div>
+          <div class="content-card p-4 rounded-lg shadow group"><img src="https://cdn.gulte.com/wp-content/uploads/2024/01/Devara-scaled.jpg">Ayudha Pooja</h3><p class="themed-text-secondary text-xs truncate">Kala Bhairava</p><button class="card-play-button absolute bottom-16 right-4 bg-brand-primary p-3 rounded-full shadow-lg text-brand-white"><svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg></button></div>
+        </div>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-semibold themed-text-primary mb-4">Popular Indian Artists</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+          <div class="content-card artist-card text-center p-4 rounded-lg shadow group">
+            <img src="https://i.scdn.co/image/ab67616d0000b273949eb6b7959abb947ae862ff" alt="A.R. Rahman" class="artist-card-image w-32 h-32 rounded-full mx-auto mb-3 object-cover">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">A.R. Rahman</h3>
+          </div>
+          <div class="content-card artist-card text-center p-4 rounded-lg shadow group">
+            <img src="https://i0.wp.com/www.primesworld.com/wp-content/uploads/Shreya-Ghoshal.jpg?w=1200&ssl=1" alt="Shreya Ghoshal" class="artist-card-image w-32 h-32 rounded-full mx-auto mb-3 object-cover">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Shreya Ghoshal</h3>
+          </div>
+          <div class="content-card artist-card text-center p-4 rounded-lg shadow group">
+            <img src="https://i.pinimg.com/originals/f1/75/eb/f175eb4e1806f055f7ea35622e773424.jpg" alt="Arijit Singh" class="artist-card-image w-32 h-32 rounded-full mx-auto mb-3 object-cover">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Arijit Singh</h3>
+          </div>
+           <div class="content-card artist-card text-center p-4 rounded-lg shadow group">
+            <img src="https://www.thestatesman.com/wp-content/uploads/2020/09/spb.jpg" alt="S.P. Balasubrahmanyam" class="artist-card-image w-32 h-32 rounded-full mx-auto mb-3 object-cover">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">S.P.B</h3>
+          </div>
+          <div class="content-card artist-card text-center p-4 rounded-lg shadow group">
+            <img src="https://i.pinimg.com/originals/dd/c9/ab/ddc9ab7eb0f6ce83d3bf6f61e1ac09b2.jpg" alt="Anirudh Ravichander" class="artist-card-image w-32 h-32 rounded-full mx-auto mb-3 object-cover">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Anirudh R.</h3>
+          </div>
+           <div class="content-card artist-card text-center p-4 rounded-lg shadow group">
+            <img src="https://wallpaperaccess.com/full/4908663.jpg" alt="Sid Sriram" class="artist-card-image w-32 h-32 rounded-full mx-auto mb-3 object-cover">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Sid Sriram</h3>
+          </div>
+          <div class="content-card artist-card text-center p-4 rounded-lg shadow group">
+            <img src="https://tse3.mm.bing.net/th?id=OIP.xo6eYN8cbqj_SOZKzasM3wHaHa&pid=Api&P=0&h=180" alt="Lata Mangeshkar" class="artist-card-image w-32 h-32 rounded-full mx-auto mb-3 object-cover">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Lata Mangeshkar</h3>
+          </div>
+          <div class="content-card artist-card text-center p-4 rounded-lg shadow group">
+            <img src="https://tse2.mm.bing.net/th?id=OIP.HFd9c1CkpUskzUmHZCldRgHaFj&pid=Api&P=0&h=180" alt="Sonu Nigam" class="artist-card-image w-32 h-32 rounded-full mx-auto mb-3 object-cover">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Sonu Nigam</h3>
+          </div>
+          <div class="content-card artist-card text-center p-4 rounded-lg shadow group">
+            <img src="https://tse2.mm.bing.net/th?id=OIP.g9LKvCB74SHre0gTiRuxsgHaFn&pid=Api&P=0&h=180" alt="Badshah" class="artist-card-image w-32 h-32 rounded-full mx-auto mb-3 object-cover">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Badshah</h3>
+          </div>
+           <div class="content-card artist-card text-center p-4 rounded-lg shadow group">
+            <img src="https://images.indianexpress.com/2024/06/diljit-dosanjh-1.jpg" alt="Diljit Dosanjh" class="artist-card-image w-32 h-32 rounded-full mx-auto mb-3 object-cover">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Diljit Dosanjh</h3>
+          </div>
+        </div>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-semibold themed-text-primary mb-4">Discover Podcasts</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div class="content-card p-4 rounded-lg shadow group">
+                <img src="https://i.scdn.co/image/4692d5b5f67b09733dc4e2cb66fd4d1cf2f28b9b" alt="Podcast Cover" class="w-full h-40 object-cover rounded mb-2">
+                <h3 class="font-semibold themed-text-primary text-md truncate">Tech Talks Daily</h3>
+                <p class="themed-text-secondary text-sm truncate">By Future Gigs</p>
+                <button class="card-play-button absolute bottom-16 right-4 bg-brand-primary p-3 rounded-full shadow-lg text-brand-white">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                </button>
+            </div>
+            <div class="content-card p-4 rounded-lg shadow group relative">
+                <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEghPAOs1GZMbcLrsxcwzfcyczleh50sJBi3bBwZ7-0RBD_vNId7OTQDvf71B-cTSXo7yHFIWvfStWAk9sszij4mfME7WGorzMsDeXb0SFrXJ79O3KC0lG_kjiXaMlVP_-ncgmHw5FlbLwUg/s1600/50275194_757240091316100_429965636949508096_o.jpg" alt="Podcast Cover" class="w-full h-40 object-cover rounded mb-2">
+                <h3 class="font-semibold themed-text-primary text-md truncate">Startup Stories</h3>
+                <p class="themed-text-secondary text-sm truncate">By Entrepreneurs Hub</p>
+                 <button class="card-play-button absolute bottom-16 right-4 bg-brand-primary p-3 rounded-full shadow-lg text-brand-white">
+                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                 </button>
+            </div>
+            <div class="content-card p-4 rounded-lg shadow group">
+                <img src="https://tse3.mm.bing.net/th?id=OIP.xHFPls54p8gfLjNiFd1J7AHaFj&pid=Api&P=0&h=180" alt="Podcast Cover" class="w-full h-40 object-cover rounded mb-2">
+                <h3 class="font-semibold themed-text-primary text-md truncate">Mindful Moments</h3>
+                <p class="themed-text-secondary text-sm truncate">By Calm Collective</p>
+                <button class="card-play-button absolute bottom-16 right-4 bg-brand-primary p-3 rounded-full shadow-lg text-brand-white">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                </button>
+            </div>
+        </div>
+      </section>
+
+      <section class="mb-8">
+        <h2 class="text-2xl font-semibold themed-text-primary mb-4">Featured Movie Soundtracks</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
+          <div class="content-card p-4 rounded-lg shadow group relative">
+            <img src="https://m.media-amazon.com/images/S/pv-target-images/436c591e1cce86bf49718ba071f461c551995942f6c5dc86e3299ea5e3fe657d.jpg" alt="Baahubali Soundtrack" class="w-full h-auto rounded mb-2">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Baahubali: The Beginning</h3>
+            <p class="themed-text-secondary text-xs truncate">M.M. Keeravani</p>
+            <button class="card-play-button absolute bottom-16 right-4 bg-brand-primary p-3 rounded-full shadow-lg text-brand-white">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+            </button>
+          </div>
+           <div class="content-card p-4 rounded-lg shadow group relative">
+            <img src="https://ottwalla.com/wp-content/uploads/2023/12/animal-2023-poster-ranbir-kapoor-1.jpeg" alt="Animal Soundtrack" class="w-full h-auto rounded mb-2">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Animal</h3>
+            <p class="themed-text-secondary text-xs truncate">Various Artists</p>
+            <div class="premium-badge">New</div>
+            <button class="card-play-button absolute bottom-16 right-4 bg-brand-primary p-3 rounded-full shadow-lg text-brand-white">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+            </button>
+          </div>
+          <div class="content-card p-4 rounded-lg shadow group relative">
+            <img src="https://musicboxtheatre.com/sites/default/files/promo-poster/rrr-poster.jpeg" alt="RRR Soundtrack" class="w-full h-auto rounded mb-2">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">RRR</h3>
+            <p class="themed-text-secondary text-xs truncate">M.M. Keeravani</p>
+            <button class="card-play-button absolute bottom-16 right-4 bg-brand-primary p-3 rounded-full shadow-lg text-brand-white">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+            </button>
+          </div>
+          <div class="content-card p-4 rounded-lg shadow group relative">
+            <img src="https://tse2.mm.bing.net/th?id=OIP.PkraVH_fabW6oJJpJ5kmawAAAA&pid=Api&P=0&h=180" alt="Jersey Soundtrack" class="w-full h-auto rounded mb-2">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Jersey</h3>
+            <p class="themed-text-secondary text-xs truncate">Sachet-Parampara</p>
+            <button class="card-play-button absolute bottom-16 right-4 bg-brand-primary p-3 rounded-full shadow-lg text-brand-white">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+            </button>
+          </div>
+           <div class="content-card p-4 rounded-lg shadow group relative">
+            <img src="https://tse4.mm.bing.net/th?id=OIP.faD_A_0KewlxDP4ziybI4QAAAA&pid=Api&P=0&h=180" alt="Hi Nanna Soundtrack" class="w-full h-auto rounded mb-2">
+            <h3 class="font-semibold themed-text-primary text-sm truncate">Hi Nanna</h3>
+            <p class="themed-text-secondary text-xs truncate">Hesham Abdul Wahab</p>
+            <button class="card-play-button absolute bottom-16 right-4 bg-brand-primary p-3 rounded-full shadow-lg text-brand-white">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+            </button>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Player Bar -->
+  <footer class="player-bar fixed bottom-0 left-0 right-0 themed-bg-tertiary p-4 flex items-center justify-between border-t themed-border z-10">
+    <div class="flex items-center space-x-3 w-1/3">
+      <img src="https://m.media-amazon.com/images/I/712nimwDLEL._SX472_SY472_BL0_QL100_.jpg" alt="Current Song Art" class="w-14 h-14 rounded flex-shrink-0">
+      <div class="flex-grow min-w-0">
+        <h4 class="font-semibold themed-text-primary text-sm">Prema Velluva(From "Hit-3")</h4>
+        <p class="themed-text-secondary text-xs">Mickey J.Meyer, Sid Sriram, Nutana Mohan, Krishna Kanth</p>
+      </div>
+      <label for="like-toggle" class="clickable-label player-control-btn themed-text-secondary hover:text-brand-primary flex-shrink-0" title="Like/Unlike">
+        <svg class="icon unliked-icon" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+        <svg class="icon liked-icon hidden filled-icon" fill="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+      </label>
+    </div>
+
+    <div class="flex flex-col items-center space-y-2 w-1/3">
+      <div class="flex items-center space-x-4">
+        <label for="shuffle-toggle" class="clickable-label player-control-btn themed-text-secondary" title="Shuffle">
+            <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path><path d="M8 10L5 7l3-3m10 10l3 3-3 3M5 17l3 3 3-3"></path><path d="M5 7h14M5 17h14"></path></svg>
+        </label>
+        <button class="player-control-btn themed-text-secondary hover:text-brand-primary" title="Previous"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg></button>
+        <label for="play-toggle" class="clickable-label player-play-btn themed-text-primary p-2 rounded-full hover:themed-bg-tertiary" title="Play/Pause">
+          <svg class="icon play-icon w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+          <svg class="icon pause-icon hidden w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 011-1h1a1 1 0 110 2H8a1 1 0 01-1-1zm5 0a1 1 0 011-1h1a1 1 0 110 2h-1a1 1 0 01-1-1z" clip-rule="evenodd"></path></svg>
+        </label>
+        <button class="player-control-btn themed-text-secondary hover:text-brand-primary" title="Next"><svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg></button>
+        <label for="repeat-toggle" class="clickable-label player-control-btn themed-text-secondary" title="Repeat">
+            <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m-15.357-2a8.001 8.001 0 0015.357 2m0 0H15"></path></svg>
+        </label>
+      </div>
+      <div class="flex items-center w-full max-w-md space-x-2">
+        <span class="themed-text-secondary text-xs">1:45</span>
+        <div class="progress-track flex-grow rounded-full themed-bg-tertiary">
+          <div class="progress-fill h-full rounded-full" style="width: 40%;"></div>
+        </div>
+        <span class="themed-text-secondary text-xs">3:45</span>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-3 w-1/3 justify-end relative">
+      <label for="lyrics-toggle" class="clickable-label player-control-btn themed-text-secondary hover:text-brand-primary" title="Lyrics">
+          <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path></svg>
+      </label>
+      <button class="player-control-btn themed-text-secondary hover:text-brand-primary queue-btn relative" title="Queue">
+        <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h10M4 18h5"></path></svg>
+        <span class="queue-notification">Added!</span>
+      </button>
+       <button class="player-control-btn themed-text-secondary hover:text-brand-primary" title="High Quality Audio (Premium)">
+        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5M5 12h14m-7-7v14"></path><circle cx="12" cy="12" r="2"></circle><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7z"></path></svg>
+      </button>
+      <label for="volume-toggle" class="clickable-label player-control-btn themed-text-secondary hover:text-brand-primary" title="Volume">
+          <svg class="icon" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.683 2.897 11 3.142 11 3.707V20.293c0 .565-.317.81-.707.414L5.586 15z"></path></svg>
+      </label>
+      <div class="volume-popup absolute bottom-full right-0 mb-2 themed-bg-tertiary p-2 rounded-md shadow-lg">
+        <div class="volume-bar w-24 h-2 rounded-full overflow-hidden">
+          <div class="volume-level bg-brand-primary h-full" style="width: 70%;"></div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Lyrics Modal -->
+  <div class="lyrics-modal-overlay">
+    <div class="lyrics-modal-content themed-bg-secondary p-6 rounded-lg shadow-xl">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-semibold themed-text-primary">Song Lyrics</h3>
+        <label for="lyrics-toggle" class="clickable-label themed-text-secondary hover:themed-text-primary">
+          <svg class="icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </label>
+      </div>
+      <div class="themed-text-secondary space-y-2 text-sm leading-relaxed">
+       <p>❤️ Dhuke naapai ila ivvale ayy 🌊</p>
+<p>💖 Prema velluvaa... 💦</p>
+
+<p>🌞 Pagale naa vaipuki nadiche kalavaa 🚶‍♂️</p>
+<p>🎶 Paduthuu yegire alavaa 🕊️</p>
+<p>💭 Manase ninu chudani okate godava ❤️</p>
+<p>👀 Kanule ipude chadhivaa ✨</p>
+
+<p>👣 Venta vachave vembadinchaave 🔥</p>
+<p>🌬️ Oopiralle maarave nede neeve 💓</p>
+<p>🙏 Nammi theerale kala kaadhe 🌟</p>
+<p>💞 Peruke nenunnale praanam neeve 🔥</p>
+
+<p>🔍 Yevarevarani vethikina 👀</p>
+<p>💫 Kanulaki thanu dhorikenaa 💖</p>
+<p>❓ Marichaanika dheninainaa nee valana... ❤️</p>
+
+<p>🤔 Telusa tholisaariga 💭</p>
+<p>🏆 Manase gelichaa 💓</p>
+<p>⏳ Yepudu yedhute nilichaa 🛑</p>
+<p>😠 Kopam marichaanugaa idi nee mahimaa? ✨</p>
+
+<p>🫂 Nijame nuvu naa sagamaa? 💍</p>
+
+<p>❤️ Prema velluvaa... 🌊</p>
+<p>💖 Prema uppenaa... 🌊</p>
+<p>💞 Prema sandhadi... 🎉</p>
+
+<p>❤️ Prema velluvaa... 🌊</p>
+<p>💖 Prema uppenaa... 🌊</p>
+<p>💞 Prema sandhadi... 🎉</p>
+
+<p>↔️ Ato ito yetainaa 👣</p>
+<p>🎵 Aduge jarige mela mellagaa 🕊️</p>
+<p>👩‍❤️‍👨 Marintha okatokatiga cherenaa 💞</p>
+<p>🤝 Manalo maname kalise vidhama ❤️</p>
+
+<p>🎼 Geetha geesane vechi choosane 👀</p>
+<p>👀 Ninnu minchi naakinka thodantu dhorukunaa 🤗</p>
+<p>⏸️ Aapalenule aagalenule ❌</p>
+<p>👁️ Choopalenule cheppalenule 💬</p>
+
+<p>🔒 Dhaachalenu neninkaa naalo preema ❤️</p>
+<p>🔍 Yevarevarani vethikina 👁️</p>
+<p>💫 Kanulaki thanu dhorikena 💖</p>
+<p>❓ Marichaanika dheninainaa nee valana... ❤️</p>
+
+<p>❤️ Prema velluvaa... 🌊</p>
+<p>💖 Prema uppenaa... 🌊</p>
+<p>💞 Prema sandhadi... 🎶</p>
+
+
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const themeToggleCheckbox = document.getElementById('theme-toggle');
+    const bodyElement = document.body;
+    const THEME_KEY = 'harmoneyeThemePreference';
+
+    function applyThemePreference(isLightMode) {
+      if (isLightMode) {
+        bodyElement.classList.add('light-mode');
+        themeToggleCheckbox.checked = true;
+      } else {
+        bodyElement.classList.remove('light-mode');
+        themeToggleCheckbox.checked = false;
+      }
+    }
+
+    function storeThemePreference(isLightMode) {
+      localStorage.setItem(THEME_KEY, isLightMode ? 'light' : 'dark');
+    }
+
+    // Load and apply theme on initial page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem(THEME_KEY);
+      let prefersLight = false;
+
+      if (savedTheme) {
+        prefersLight = savedTheme === 'light';
+      } else {
+        // If no saved theme, check system preference
+        prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+      }
+      applyThemePreference(prefersLight);
+
+      // Listen for changes on the toggle
+      themeToggleCheckbox.addEventListener('change', () => {
+        const isLightMode = themeToggleCheckbox.checked;
+        applyThemePreference(isLightMode);
+        storeThemePreference(isLightMode);
+      });
+
+      // Optional: Listen for system theme changes if no preference is stored
+      // This is more advanced and might be overkill if localStorage is sufficient
+      window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', e => {
+        // Only update if no explicit user preference is stored
+        if (!localStorage.getItem(THEME_KEY)) {
+          applyThemePreference(e.matches);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
